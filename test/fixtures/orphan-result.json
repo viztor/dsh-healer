@@ -1,0 +1,16 @@
+{
+  "seq": 4812,
+  "role": "tool",
+  "toolCallId": "call-3",
+  "content": [
+    {
+      "type": "text",
+      "text": "<text elided>"
+    }
+  ],
+  "isError": true,
+  "source": {
+    "kind": "tool",
+    "callId": "call-3"
+  }
+}

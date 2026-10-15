@@ -1,0 +1,11 @@
+# pnpm settings live here — pnpm 12 no longer reads them from package.json.
+#
+# esbuild's install script is the fallback that verifies its platform-specific
+# binary package. It is not a direct dependency: it arrives transitively through
+# the Vite+ toolchain. Without this, `pnpm install` fails with
+# ERR_PNPM_IGNORED_BUILDS rather than warning.
+#
+# The allowance names exactly one package, so a new dependency that wants to run
+# install scripts still fails loudly and has to be considered.
+allowBuilds:
+  esbuild: true

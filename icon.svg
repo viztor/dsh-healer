@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Heal">
+  <title>Heal</title>
+  <defs>
+    <linearGradient id="heal-grad" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded healing cross with shield contour -->
+  <g fill="none" stroke="url(#heal-grad)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 6 C32 6 40 10 40 20 C40 32 29 40 24 43 C19 40 8 32 8 20 C8 10 16 6 24 6 Z" stroke-width="3" fill="#10B981" fill-opacity="0.1"/>
+    <path d="M24 14 V30" stroke-width="4.5"/>
+    <path d="M16 22 H32" stroke-width="4.5"/>
+  </g>
+</svg>

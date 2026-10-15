@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # The toolchain moves quickly, and a pinned action or devDependency that is
+  # never updated is how a repository quietly rots. Grouped so the noise is one
+  # pull request a week rather than one per package.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # Workflow actions, including `voidzero-dev/setup-vp`, which the CI guide
+  # recommends keeping current by exact tag.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

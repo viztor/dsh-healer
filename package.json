@@ -1,0 +1,98 @@
+{
+  "name": "dsh-healer",
+  "version": "0.1.0",
+  "description": "Repairs malformed tool-call blocks in the outbound DSH model request, so one degenerate generation cannot permanently poison a session.",
+  "keywords": [
+    "cordis",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "fault-tolerance",
+    "self-healing",
+    "tool-call"
+  ],
+  "homepage": "https://github.com/viztor/dsh-healer#readme",
+  "bugs": {
+    "url": "https://github.com/viztor/dsh-healer/issues"
+  },
+  "license": "MIT",
+  "author": "Leo (viztor)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viztor/dsh-healer.git"
+  },
+  "files": [
+    "lib",
+    "src",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib/*": "./lib/*",
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./locale/*.json": "./locale/*.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "prepare": "pnpm run build",
+    "test": "vp test",
+    "test:coverage": "vp test --coverage",
+    "test:mutation": "node scripts/mutate.ts",
+    "test:upstream": "node scripts/verify-upstream-fix.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "typecheck:src": "tsc --noEmit -p tsconfig.src.json",
+    "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json",
+    "ci": "vp check && pnpm run typecheck:src && pnpm run typecheck && pnpm run typecheck:scripts && pnpm test && pnpm run test:upstream",
+    "ci:full": "pnpm run ci && pnpm run test:mutation",
+    "audit:session": "node scripts/audit-session.ts",
+    "test:no-harness": "DSH_HEAL_ALLOW_NO_HARNESS=1 vp test",
+    "typecheck:dlx": "pnpm dlx --package=typescript@5.9.3 tsc --noEmit -p tsconfig.test.json",
+    "accept:live": "node scripts/live-acceptance.ts"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "typescript": "^7.0.2",
+    "vite-plus": "^1.2.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2"
+  },
+  "icon": "./icon.svg",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.10.1",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "compatibility": {
+      "node": ">=24",
+      "dsh": "^0.2.0-rc.1 || >=0.2.1-0 <0.3.0"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-plugin-manager"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

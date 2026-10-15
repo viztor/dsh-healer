@@ -1,0 +1,9 @@
+#!/bin/sh
+# Reject a commit message that does not follow Conventional Commits.
+#
+# Project-owned: `vp hooks enable` installs a dispatcher beside this file and
+# never writes it. The rule list lives in `commitlint.config.mjs`.
+#
+# `vp exec` runs the binary from this project's `node_modules/.bin`, so the check
+# uses the pinned commitlint rather than whatever happens to be on PATH.
+vp exec commitlint --edit "$1"

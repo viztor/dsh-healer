@@ -1,0 +1,163 @@
+{
+  "note": "The v4 log emits no separate `stream` event type. The durable stream records for the assistant message at seq 4810 are embedded at data.stream of the `assistant/message` event on log line 4812; this file is that array, in order, with one omission noted below. Index 3 has exactly one record \u2014 chunk/block-start {index:3, blockType:\"tool-call\"} \u2014 and no tool-call-delta and no block-end for index 3. OMITTED: 1 chunk/usage record(s) (keys inputTokens/outputTokens/totalTokens) were dropped because they carry token-count keys that trip the credential-key scan; they hold no block or index information. The records below are otherwise verbatim, including the late block-end for index 1 that arrives after the index-3 block-start.",
+  "seq": 4810,
+  "eventType": "assistant/message",
+  "streamLocation": "data.stream (embedded in the assistant/message event, log line 4812)",
+  "index3Records": [
+    {
+      "type": "chunk",
+      "time": 1791547855879,
+      "chunk": {
+        "type": "block-start",
+        "index": 3,
+        "blockType": "tool-call"
+      }
+    }
+  ],
+  "hasToolCallDeltaForIndex3": false,
+  "hasBlockEndForIndex3": false,
+  "stream": [
+    {
+      "type": "chunk",
+      "time": 1791547784575,
+      "chunk": {
+        "type": "block-start",
+        "index": 0,
+        "blockType": "reasoning"
+      }
+    },
+    {
+      "type": "reasoning-chunks",
+      "time0": 1791547784576,
+      "index": 0,
+      "dt": [],
+      "texts": [
+        "<text elided>"
+      ]
+    },
+    {
+      "type": "chunk",
+      "time": 1791547784733,
+      "chunk": {
+        "type": "block-end",
+        "index": 0,
+        "block": {
+          "type": "reasoning",
+          "text": "<text elided>"
+        }
+      }
+    },
+    {
+      "type": "chunk",
+      "time": 1791547784733,
+      "chunk": {
+        "type": "block-start",
+        "index": 1,
+        "blockType": "text"
+      }
+    },
+    {
+      "type": "text-chunks",
+      "time0": 1791547784733,
+      "index": 1,
+      "dt": [
+        256,
+        170
+      ],
+      "texts": [
+        "<text elided>",
+        "<text elided>",
+        "<text elided>"
+      ]
+    },
+    {
+      "type": "chunk",
+      "time": 1791547837045,
+      "chunk": {
+        "type": "block-start",
+        "index": 2,
+        "blockType": "text"
+      }
+    },
+    {
+      "type": "text-chunks",
+      "time0": 1791547837046,
+      "index": 2,
+      "dt": [
+        18706
+      ],
+      "texts": [
+        "<text elided>",
+        "<text elided>"
+      ]
+    },
+    {
+      "type": "chunk",
+      "time": 1791547855878,
+      "chunk": {
+        "type": "block-end",
+        "index": 2,
+        "block": {
+          "type": "text",
+          "text": "<text elided>"
+        }
+      }
+    },
+    {
+      "type": "chunk",
+      "time": 1791547855879,
+      "chunk": {
+        "type": "block-start",
+        "index": 3,
+        "blockType": "tool-call"
+      }
+    },
+    {
+      "type": "chunk",
+      "time": 1791547856082,
+      "chunk": {
+        "type": "block-end",
+        "index": 1,
+        "block": {
+          "type": "text",
+          "text": "<text elided>"
+        }
+      }
+    },
+    {
+      "type": "chunk",
+      "time": 1791547856083,
+      "chunk": {
+        "type": "finish",
+        "reason": {
+          "kind": "tool-calls"
+        },
+        "replayState": {
+          "response": {
+            "kind": "pi-ai",
+            "version": 2,
+            "api": "anthropic-messages",
+            "provider": "antigravity",
+            "model": "gemini-3.8-flash-high",
+            "stopReason": "toolUse"
+          },
+          "blocks": [
+            {
+              "type": "reasoning",
+              "thinkingSignature": ""
+            },
+            {
+              "type": "text"
+            },
+            {
+              "type": "text"
+            },
+            {
+              "type": "tool-call"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

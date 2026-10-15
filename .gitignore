@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+._*
+
+# Dependencies (this package has none by design, but a profile install may add them)
+node_modules/
+
+# Local session logs — never commit these. They are private, machine-specific, and
+# large. The audit script reads them in place; it does not copy them in.
+*.jsonl
+*.jsonl.zstd
+sessions/
+# ...except hand-written test fixtures, which are sanitised by construction: no
+# machine paths, no real prose, no account identifiers. Without this exception a
+# new fixture is silently ignored, the test that reads it passes locally and fails
+# on a fresh clone. `test/no-machine-paths.test.ts` scans these like any other file.
+!test/fixtures/*.jsonl
+
+# Coverage and diagnostics output
+coverage/
+*.lcov
+*.log
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# Vite+ generated Git hook dispatcher. The dispatcher and its shims are
+# recreated by `vp hooks enable` / `vp config`; the project-owned hook scripts
+# beside them (`.vite-hooks/pre-commit`) ARE committed.
+.vite-hooks/_
+
+# Package tarballs from `npm pack`
+*.tgz
