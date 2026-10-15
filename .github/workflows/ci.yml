@@ -27,7 +27,7 @@ jobs:
         node-version: ['24', '26']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Pinned to an exact release: the `v1` tag no longer receives updates and
       # the project's own guidance is not to use it. setup-vp installs Vite+,
