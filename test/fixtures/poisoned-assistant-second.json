@@ -1,0 +1,43 @@
+{
+  "seq": 7361,
+  "role": "assistant",
+  "content": [
+    {
+      "type": "tool-call",
+      "id": "call_1930875",
+      "name": "bash",
+      "arguments": "{\"elided\":true}"
+    },
+    {
+      "type": "tool-call",
+      "id": "call-1",
+      "name": "",
+      "arguments": ""
+    }
+  ],
+  "source": {
+    "kind": "model",
+    "provider": "antigravity",
+    "model": "gemini-3.8-flash",
+    "replayState": {
+      "response": {
+        "kind": "pi-ai",
+        "version": 2,
+        "api": "anthropic-messages",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash",
+        "responseModel": "gemini-3.8-flash-high",
+        "stopReason": "toolUse"
+      },
+      "blocks": [
+        {
+          "type": "tool-call"
+        },
+        {
+          "type": "tool-call"
+        }
+      ]
+    }
+  },
+  "_note": "Second, independent occurrence of the same defect, in a different session. Found in a file named session.v3.jsonl.zstd whose payload is actually the v4 event format. Two tool calls coexist here: a valid one (call_1930875) and a fabricated empty-name one (call-1)."
+}

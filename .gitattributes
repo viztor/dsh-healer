@@ -1,0 +1,21 @@
+# Normalise line endings in the repository, not in each contributor's editor.
+#
+# Without this, a Windows clone that checks out CRLF produces a diff on every
+# line of every file, and the formatter reports the whole tree as changed. The
+# working tree keeps the platform's native endings; what Git stores, and what CI
+# checks out, is always LF.
+* text=auto eol=lf
+
+# Fixtures are captured evidence and are hashed by `test/replay.test.ts`. They
+# are already LF; pinning them means no checkout can silently rewrite them.
+test/fixtures/** -text
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.webp binary
+*.tgz binary
+
+# Keep generated bundles out of diffs and language statistics.
+lib/index.js linguist-generated=true
+lib/client.js linguist-generated=true

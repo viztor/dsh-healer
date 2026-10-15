@@ -1,0 +1,7 @@
+# pnpm settings live here (pnpm 12 no longer reads them from package.json).
+#
+# esbuild ships a platform-specific binary package; its install script is the
+# fallback that verifies it. Allowing exactly this one script keeps the build
+# reproducible without opening the door to every dependency in the tree.
+allowBuilds:
+  esbuild: true

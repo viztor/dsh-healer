@@ -1,0 +1,35 @@
+# Bundle patch for `dsh-healer`.
+#
+# One job: insert the plugin's own row. It has no configuration opinions beyond
+# its defaults, because the defaults are the evidence-driven ones — the rules
+# that fix the observed incident are on, and the speculative ones are off.
+#
+# A host that wants a different arrangement overrides this in its own patch
+# layer, which applies later and therefore wins. The useful shapes are:
+#
+#   # Observe only: detect and report, never rewrite the request.
+#   - id: dsh-healer
+#     config:
+#       mode: check
+#
+#   # Disable one rule without disabling the plugin.
+#   - id: dsh-healer
+#     config:
+#       rules:
+#         tool-call-arguments:
+#           enabled: false
+#
+#   # Fail loudly instead of logging, so a malformed history is caught in CI.
+#   - id: dsh-healer
+#     config:
+#       onFindings: throw
+#
+# `mode: off` installs no patch at all, which is the honest way to disable the
+# plugin if the row has to stay in the tree.
+- insert:
+    - id: dsh-healer
+      name: 'dsh-healer'
+      config:
+        mode: fail-safe
+        onFindings: log
+        strictRuleIds: true

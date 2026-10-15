@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege: this workflow only reads the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The plugin declares `engines.node >= 24`. Both the floor and the
+        # current release are exercised, so a break on either is caught here
+        # rather than by a user.
+        node-version: ['24', '26']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to an exact release: the `v1` tag no longer receives updates and
+      # the project's own guidance is not to use it. setup-vp installs Vite+,
+      # the requested Node, and the package manager, and runs `vp install`
+      # (which also triggers this package's `prepare` build) with caching.
+      - uses: voidzero-dev/setup-vp@v1.21.2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: true
+
+      - name: Format and lint
+        run: vp check
+
+      - name: Typecheck src
+        run: vp run typecheck:src
+
+      - name: Typecheck tests
+        run: vp run typecheck
+
+      - name: Typecheck scripts and config
+        run: vp run typecheck:scripts
+
+      - name: Build bundles
+        run: vp run build
+
+      # The suite is run with the harness explicitly acknowledged as absent:
+      # this package declares @deepseek-ai/dsh-llm as a *peer* on purpose, since
+      # a second copy would make the prototype patch target a class the runtime
+      # never uses. `test/harness-required.test.ts` fails rather than silently
+      # skipping, so the acknowledgement is explicit and greppable.
+      - name: Run the suite
+        run: vp run test:no-harness
+
+      - name: Machine-path leak guard
+        run: node --test test/no-machine-paths.test.ts
+
+      - name: Mutation gate
+        run: vp run test:mutation
+
+      - name: Upstream verifier
+        run: vp run test:upstream

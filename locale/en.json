@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Heal",
+    "description": "Repairs malformed tool-call blocks in the outbound DSH model request, so one degenerate generation cannot permanently poison a session."
+  }
+}

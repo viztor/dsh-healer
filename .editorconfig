@@ -1,0 +1,20 @@
+# Editor defaults, so a contributor's tooling does not fight the repository.
+#
+# The formatter owns whitespace; this file only tells editors what the formatter
+# expects, so a file does not arrive reformatted in the first place.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+# Trailing whitespace is a Markdown line break, so it is preserved here.
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab

@@ -1,0 +1,20 @@
+#!/bin/sh
+# Format and lint whatever this commit has staged.
+#
+# Project-owned: `vp hooks enable` installs a dispatcher beside this file and
+# never writes it, so this is the place to change hook policy.
+#
+# Deliberately cheap. The full gate — three typechecks, the 547-test suite,
+# mutation testing and the upstream verifier — runs in CI, where it cannot be
+# skipped. A pre-commit hook that takes two minutes is one everybody learns to
+# bypass with `git commit --no-verify`, which is strictly worse than a fast hook
+# that always runs.
+#
+# Set VP_GIT_HOOKS=0 (or HUSKY=0) to skip every Vite+ hook for one command.
+#
+# Bare `vp` is correct here, and is not a missing-PATH bug: the generated
+# dispatcher in `.vite-hooks/_` prepends this project's `node_modules/.bin` to
+# PATH before running this file. Invoking this script directly therefore fails
+# with "vp: command not found" — run `.vite-hooks/_/pre-commit` to test it, which
+# is what Git does.
+vp staged

@@ -1,0 +1,54 @@
+{
+  "seq": 4810,
+  "role": "assistant",
+  "content": [
+    {
+      "type": "reasoning",
+      "text": "<text elided>"
+    },
+    {
+      "type": "text",
+      "text": "<text elided>"
+    },
+    {
+      "type": "text",
+      "text": "<text elided>"
+    },
+    {
+      "type": "tool-call",
+      "id": "call-3",
+      "name": "",
+      "arguments": ""
+    }
+  ],
+  "source": {
+    "kind": "model",
+    "provider": "antigravity",
+    "model": "gemini-3.8-flash-high",
+    "replayState": {
+      "response": {
+        "kind": "pi-ai",
+        "version": 2,
+        "api": "anthropic-messages",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-high",
+        "stopReason": "toolUse"
+      },
+      "blocks": [
+        {
+          "type": "reasoning",
+          "thinkingSignature": ""
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "tool-call"
+        }
+      ]
+    }
+  }
+}

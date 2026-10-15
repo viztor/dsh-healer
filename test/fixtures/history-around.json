@@ -1,0 +1,260 @@
+[
+  {
+    "seq": 4767,
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      }
+    ],
+    "source": {
+      "kind": "goal",
+      "revision": 1,
+      "round": 2
+    }
+  },
+  {
+    "seq": 4769,
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      },
+      {
+        "type": "tool-call",
+        "id": "call_1441067",
+        "name": "get_goal",
+        "arguments": "{\"elided\":true}"
+      }
+    ],
+    "source": {
+      "kind": "model",
+      "provider": "antigravity",
+      "model": "gemini-3.8-flash-high",
+      "replayState": {
+        "response": {
+          "kind": "pi-ai",
+          "version": 2,
+          "api": "anthropic-messages",
+          "provider": "antigravity",
+          "model": "gemini-3.8-flash-high",
+          "stopReason": "toolUse"
+        },
+        "blocks": [
+          {
+            "type": "text"
+          },
+          {
+            "type": "tool-call"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "seq": 4771,
+    "role": "tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      }
+    ],
+    "toolCallId": "call_1441067",
+    "isError": false,
+    "source": {
+      "kind": "tool",
+      "callId": "call_1441067"
+    }
+  },
+  {
+    "seq": 4789,
+    "role": "assistant",
+    "content": [
+      {
+        "type": "reasoning",
+        "text": "<text elided>"
+      },
+      {
+        "type": "text",
+        "text": "<text elided>"
+      },
+      {
+        "type": "tool-call",
+        "id": "call_139445",
+        "name": "todo_write",
+        "arguments": "{\"elided\":true}"
+      }
+    ],
+    "source": {
+      "kind": "model",
+      "provider": "antigravity",
+      "model": "gemini-3.8-flash-high",
+      "replayState": {
+        "response": {
+          "kind": "pi-ai",
+          "version": 2,
+          "api": "anthropic-messages",
+          "provider": "antigravity",
+          "model": "gemini-3.8-flash-high",
+          "stopReason": "toolUse"
+        },
+        "blocks": [
+          {
+            "type": "reasoning",
+            "thinkingSignature": ""
+          },
+          {
+            "type": "text"
+          },
+          {
+            "type": "tool-call"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "seq": 4792,
+    "role": "tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      }
+    ],
+    "toolCallId": "call_139445",
+    "isError": false,
+    "source": {
+      "kind": "tool",
+      "callId": "call_139445"
+    }
+  },
+  {
+    "seq": 4800,
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      },
+      {
+        "type": "tool-call",
+        "id": "call_1511380",
+        "name": "grep",
+        "arguments": "{\"elided\":true}"
+      }
+    ],
+    "source": {
+      "kind": "model",
+      "provider": "antigravity",
+      "model": "gemini-3.8-flash-high",
+      "replayState": {
+        "response": {
+          "kind": "pi-ai",
+          "version": 2,
+          "api": "anthropic-messages",
+          "provider": "antigravity",
+          "model": "gemini-3.8-flash-high",
+          "stopReason": "toolUse"
+        },
+        "blocks": [
+          {
+            "type": "text"
+          },
+          {
+            "type": "tool-call"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "seq": 4802,
+    "role": "tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      }
+    ],
+    "toolCallId": "call_1511380",
+    "isError": false,
+    "source": {
+      "kind": "tool",
+      "callId": "call_1511380"
+    }
+  },
+  {
+    "seq": 4810,
+    "role": "assistant",
+    "content": [
+      {
+        "type": "reasoning",
+        "text": "<text elided>"
+      },
+      {
+        "type": "text",
+        "text": "<text elided>"
+      },
+      {
+        "type": "text",
+        "text": "<text elided>"
+      },
+      {
+        "type": "tool-call",
+        "id": "call-3",
+        "name": "",
+        "arguments": ""
+      }
+    ],
+    "source": {
+      "kind": "model",
+      "provider": "antigravity",
+      "model": "gemini-3.8-flash-high",
+      "replayState": {
+        "response": {
+          "kind": "pi-ai",
+          "version": 2,
+          "api": "anthropic-messages",
+          "provider": "antigravity",
+          "model": "gemini-3.8-flash-high",
+          "stopReason": "toolUse"
+        },
+        "blocks": [
+          {
+            "type": "reasoning",
+            "thinkingSignature": ""
+          },
+          {
+            "type": "text"
+          },
+          {
+            "type": "text"
+          },
+          {
+            "type": "tool-call"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "seq": 4812,
+    "role": "tool",
+    "toolCallId": "call-3",
+    "content": [
+      {
+        "type": "text",
+        "text": "<text elided>"
+      }
+    ],
+    "isError": true,
+    "source": {
+      "kind": "tool",
+      "callId": "call-3"
+    }
+  }
+]
