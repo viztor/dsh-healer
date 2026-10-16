@@ -53,13 +53,16 @@ jobs:
       - name: Build bundles
         run: vp run build
 
-      # The suite is run with the harness explicitly acknowledged as absent:
-      # this package declares @deepseek-ai/dsh-llm as a *peer* on purpose, since
-      # a second copy would make the prototype patch target a class the runtime
-      # never uses. `test/harness-required.test.ts` fails rather than silently
-      # skipping, so the acknowledgement is explicit and greppable.
+      # The full suite, with the harness guard **active**. It used to run with
+      # `DSH_HEAL_ALLOW_NO_HARNESS=1` because the resolver only searched the pnpm
+      # dlx cache under `$HOME`, which CI does not have — so the harness was
+      # "absent" there even though `pnpm install` had just installed it as a peer.
+      # The resolver now searches this installation's own store first, so the
+      # guard can do its job: if the harness ever stops resolving, CI fails here
+      # instead of quietly running 500 tests with the harness-dependent ones
+      # skipped.
       - name: Run the suite
-        run: vp run test:no-harness
+        run: vp test
 
       # Already part of the suite above. It runs again as its own step because a
       # guard whose job is "this must always run" deserves a status of its own in

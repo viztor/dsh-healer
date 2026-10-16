@@ -25,7 +25,7 @@ import { dirname, join } from 'node:path';
 import { describe, it } from 'vite-plus/test';
 import { fileURLToPath } from 'node:url';
 
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 import { countRoles, deriveMessages, messageOf } from '../scripts/session-history.ts';
 import type { SessionMessage } from '../scripts/session-history.ts';
@@ -231,7 +231,7 @@ describe('session-history · agreement with the harness projection', () => {
       exists: (path) => existsSync(path),
       join: (...parts) => join(...parts),
     };
-    const found = resolveHarnessEntry(
+    const found = resolveInstalledEntry(
       '@deepseek-ai/dsh-session',
       'lib/index.js',
       storeFs,

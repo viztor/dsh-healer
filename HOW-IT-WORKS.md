@@ -525,6 +525,26 @@ Two details that a fake-context test cannot reach:
 The bare specifier is tried first deliberately: it is the path that guarantees the
 **same physical module** the runtime uses.
 
+#### The path resolver, used by the suite and the developer scripts
+
+`resolveInstalledEntry()` resolves a _path_ rather than loading a module, so it
+cannot use a bare specifier. It searches, in order:
+
+1. This installation's own `node_modules/.pnpm` — what CI and a profile install
+   have, because `pnpm install` places the peers there.
+2. The pnpm dlx roots under the home directory — what a bare source checkout on a
+   developer machine has.
+
+The local store is listed first because leaving it out was not harmless. A
+dlx-only search finds nothing in CI, so every harness-dependent file skipped
+silently — and `harness-required.test.ts`, whose entire job is to refuse exactly
+that, failed instead. The suite reported 7 failures and 16 skips on a machine
+where the dependency had been installed the whole time.
+
+`resolveHarnessEntry()` stays dlx-only and pure, because its tests drive it with
+synthetic stores: adding a real root would make them find this machine's packages
+instead of the fixture they describe.
+
 ---
 
 ## 9. Guarantees, and how each is enforced

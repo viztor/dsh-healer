@@ -28,7 +28,7 @@ import { dirname, join } from 'node:path';
 import { describe, it } from 'vite-plus/test';
 import { fileURLToPath } from 'node:url';
 
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 
 /** The directory this file lives in, for the structural checks below. */
 const TEST_DIR = dirname(fileURLToPath(import.meta.url));
@@ -44,7 +44,7 @@ const fs: StoreFs = {
 function findHarness(): string | undefined {
   const override = process.env.DSH_HEAL_LLM_MODULE;
   if (override !== undefined && override.length > 0) return override;
-  return resolveHarnessEntry('@deepseek-ai/dsh-llm', 'lib/index.js', fs, homedir());
+  return resolveInstalledEntry('@deepseek-ai/dsh-llm', 'lib/index.js', fs, homedir());
 }
 
 const harness = findHarness();
@@ -75,7 +75,7 @@ describe('harness availability', { skip: allowedAbsent }, () => {
 
 describe('harness availability · one resolver', () => {
   /**
-   * Every harness-dependent test must resolve through `resolveHarnessEntry`.
+   * Every harness-dependent test must resolve through `resolveInstalledEntry`.
    *
    * The guard above asserts the harness is *resolvable*. That is not the same as
    * the harness-dependent tests *running*, and the difference cost eleven tests:
@@ -87,7 +87,7 @@ describe('harness availability · one resolver', () => {
    * A structural check is the right shape here because the defect is structural:
    * two resolvers with different reach. There is now one, and this keeps it that
    * way. If a test needs a path inside the installed harness it calls
-   * `resolveHarnessEntry`, or it re-derives the layout and this fails.
+   * `resolveInstalledEntry`, or it re-derives the layout and this fails.
    */
   it('no test file re-derives the pnpm store layout', () => {
     const offenders: string[] = [];
@@ -100,7 +100,7 @@ describe('harness availability · one resolver', () => {
     assert.deepEqual(
       offenders,
       [],
-      `these files build their own dlx roots instead of calling resolveHarnessEntry: ${offenders.join(', ')}`,
+      `these files build their own dlx roots instead of calling resolveInstalledEntry: ${offenders.join(', ')}`,
     );
   });
 
@@ -109,8 +109,8 @@ describe('harness availability · one resolver', () => {
     for (const name of files) {
       const source = readFileSync(join(TEST_DIR, `${name}.test.ts`), 'utf8');
       assert.ok(
-        source.includes('resolveHarnessEntry'),
-        `${name}.test.ts must resolve the harness through resolveHarnessEntry`,
+        source.includes('resolveInstalledEntry'),
+        `${name}.test.ts must resolve the harness through resolveInstalledEntry`,
       );
     }
   });
@@ -142,7 +142,7 @@ describe('harness availability · every store-resolved dependency', () => {
 
   for (const [packageName, inner, affected] of DEPENDENCIES) {
     it(`${packageName} resolves, so ${affected} actually runs`, () => {
-      const found = resolveHarnessEntry(packageName, inner, fs, homedir());
+      const found = resolveInstalledEntry(packageName, inner, fs, homedir());
       assert.ok(
         found !== undefined,
         `${packageName}/${inner} could not be resolved from the pnpm store, so these ` +

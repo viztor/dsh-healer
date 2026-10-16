@@ -22,7 +22,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it } from 'vite-plus/test';
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 
 /** Locate the installed `BlockAssembler`, without naming a user-specific path. */
@@ -40,7 +40,12 @@ function findAssembler(): string | undefined {
   if (sandbox !== undefined && sandbox.length > 0) return sandbox;
   const override = process.env.DSH_LLM_MODULE;
   if (override !== undefined && override.length > 0) return override;
-  return resolveHarnessEntry('@deepseek-ai/dsh-llm', 'lib/types/assembler.js', storeFs, homedir());
+  return resolveInstalledEntry(
+    '@deepseek-ai/dsh-llm',
+    'lib/types/assembler.js',
+    storeFs,
+    homedir(),
+  );
 }
 const storeFs: StoreFs = {
   readdir: (dir) => readdirSync(dir),

@@ -22,7 +22,7 @@ import assert from 'node:assert/strict';
 import { afterAll, beforeAll, describe, it } from 'vite-plus/test';
 
 import { install } from '../src/patch.ts';
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 import type { MarkerPort, PatchTarget, StreamOptions } from '../src/patch.ts';
 import type { MessageLike } from '../src/types.ts';
@@ -61,7 +61,7 @@ async function resolveHarness(): Promise<string | undefined> {
     exists: (path) => existsSync(path),
     join: (...parts) => join(...parts),
   };
-  return resolveHarnessEntry('@deepseek-ai/dsh-llm', 'lib/index.js', storeFs, homedir());
+  return resolveInstalledEntry('@deepseek-ai/dsh-llm', 'lib/index.js', storeFs, homedir());
 }
 
 const HARNESS = await resolveHarness();

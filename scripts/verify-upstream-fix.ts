@@ -39,13 +39,25 @@ import { homedir, tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import { FIND, FIND_BUNDLED, REPLACE, REPLACE_BUNDLED } from '../upstream/assembler-fix.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 /**
  * Locate the installed `@deepseek-ai/dsh-llm` package directory.
+ *
+ * A bare resolution first, because that is what the runtime itself uses and what
+ * CI actually has: the package is declared as a peer, so `pnpm install` places it
+ * in the local `node_modules`. The dlx store scan below is a development
+ * convenience for a source checkout that has none — and using it as the only
+ * path meant this script could not run in CI at all, failing with "could not
+ * locate the installed @deepseek-ai/dsh-llm package" on a machine that had it
+ * installed the whole time.
+ *
+ * `package.json` is resolved rather than the assembler's own subpath, because
+ * the package's `exports` map does not expose `lib/` and a deep resolve is
+ * refused with ERR_PACKAGE_PATH_NOT_EXPORTED.
  */
 function findPackage(): string | undefined {
   const storeFs = {
@@ -53,7 +65,7 @@ function findPackage(): string | undefined {
     exists: (path: string) => existsSync(path),
     join: (...parts: string[]) => join(...parts),
   };
-  const entry = resolveHarnessEntry(
+  const entry = resolveInstalledEntry(
     '@deepseek-ai/dsh-llm',
     'lib/types/assembler.js',
     storeFs,

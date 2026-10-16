@@ -19,7 +19,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it } from 'vite-plus/test';
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -28,7 +28,7 @@ const SHIMS = readFileSync(join(ROOT, 'types', 'node-shims.d.ts'), 'utf8');
 /** Locate the installed `@types/node` package directory. */
 /** The installed @types/node directory, via the shared resolver. */
 function findTypesNode(): string | undefined {
-  const entry = resolveHarnessEntry('@types/node', 'package.json', storeFs, homedir());
+  const entry = resolveInstalledEntry('@types/node', 'package.json', storeFs, homedir());
   return entry === undefined ? undefined : dirname(entry);
 }
 const storeFs: StoreFs = {

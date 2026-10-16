@@ -28,12 +28,12 @@ import { describe, it } from 'vite-plus/test';
 import { createHealer } from '../src/engine.ts';
 import { DEFAULT_RULES } from '../src/rules/index.ts';
 import type { MessageLike } from '../src/types.ts';
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 
 /** Locate a file inside an installed package, via the shared resolver. */
 function findInStore(packageName: string, inner: string): string | undefined {
-  return resolveHarnessEntry(packageName, inner, storeFs, homedir());
+  return resolveInstalledEntry(packageName, inner, storeFs, homedir());
 }
 const storeFs: StoreFs = {
   readdir: (dir) => readdirSync(dir),

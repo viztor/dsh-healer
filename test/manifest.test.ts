@@ -18,7 +18,7 @@ import { describe, it } from 'vite-plus/test';
 import { resolveConfig } from '../src/config.ts';
 import { unknownRuleIds } from '../src/engine.ts';
 import { DEFAULT_RULES } from '../src/rules/index.ts';
-import { resolveHarnessEntry } from '../src/resolve-harness.ts';
+import { resolveInstalledEntry } from '../src/resolve-harness.ts';
 import type { StoreFs } from '../src/resolve-harness.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -103,7 +103,7 @@ describe('package manifest', () => {
 function findYamlParser(): string | undefined {
   for (const packageName of ['js-yaml', 'yaml']) {
     for (const inner of ['dist/js-yaml.mjs', 'dist/index.js', 'index.js']) {
-      const found = resolveHarnessEntry(packageName, inner, storeFs, homedir());
+      const found = resolveInstalledEntry(packageName, inner, storeFs, homedir());
       if (found !== undefined) return found;
     }
   }

@@ -19,7 +19,20 @@
  * @module dsh-healer/resolve-harness
  */
 
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const DEFAULT_LLM_PACKAGE = '@deepseek-ai/dsh-llm';
+
+/**
+ * This package's own root directory.
+ *
+ * Correct from both `src/resolve-harness.ts` and the bundled `lib/index.js`: each
+ * sits two levels below the package root.
+ */
+export function localRoot(): string {
+  return dirname(dirname(fileURLToPath(import.meta.url)));
+}
 
 /** The module specifier to load, honouring the override. */
 export function llmSpecifier(): string {
@@ -122,6 +135,40 @@ export function resolveHarnessEntry(
   depth = 3,
 ): string | undefined {
   for (const root of dlxRoots(homedirPath, fs.join)) {
+    if (!fs.exists(root)) continue;
+    const store = fs.join(root, 'node_modules', '.pnpm');
+    if (fs.exists(store)) {
+      const direct = entryIn(store, packageName, innerPath, fs);
+      if (direct !== undefined) return direct;
+    }
+    const found = searchForHarnessEntry(root, depth, fs, packageName, innerPath);
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
+/**
+ * Resolve a package entry from any store this installation can see.
+ *
+ * The **local** store first, then the dlx roots. That order is the difference
+ * between working and not in CI: `pnpm install` there puts the peers into the
+ * project's own `node_modules`, and there is no dlx cache under `$HOME` at all,
+ * so a dlx-only search finds nothing and every harness-dependent file silently
+ * contributes zero tests.
+ *
+ * `resolveHarnessEntry` stays dlx-only and pure. Its tests drive it with
+ * synthetic stores, and adding a real root to it would make those tests find
+ * this machine's actual packages instead of the fixture they describe.
+ */
+export function resolveInstalledEntry(
+  packageName: string,
+  innerPath: string,
+  fs: StoreFs,
+  homedirPath: string,
+  depth = 3,
+): string | undefined {
+  const roots = [localRoot(), ...dlxRoots(homedirPath, fs.join)];
+  for (const root of roots) {
     if (!fs.exists(root)) continue;
     const store = fs.join(root, 'node_modules', '.pnpm');
     if (fs.exists(store)) {
