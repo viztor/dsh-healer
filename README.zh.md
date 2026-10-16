@@ -1,16 +1,24 @@
-# Heal (`dsh-healer`)
+<div align="center">
+  <p><a href="./README.md">English</a> &nbsp;·&nbsp; <b>简体中文</b></p>
 
-[![npm](https://img.shields.io/npm/v/dsh-healer.svg)](https://www.npmjs.com/package/dsh-healer)
-[![downloads](https://img.shields.io/npm/dm/dsh-healer.svg)](https://www.npmjs.com/package/dsh-healer)
-[![CI](https://github.com/viztor/dsh-healer/actions/workflows/ci.yml/badge.svg)](https://github.com/viztor/dsh-healer/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-MIT-blue.svg)](LICENSE)
+  <img src="icon.svg" alt="Heal on DeepSeek Harness" width="112" />
+  <h1>dsh-healer</h1>
+  <p><b>DeepSeek Harness（DSH）零拷贝、非侵入式 Cordis 宿主自愈插件。</b><br />在飞行中修复畸变的工具调用块与孤立工具结果。</p>
 
-DeepSeek Harness (DSH) 零拷贝、非侵入式 Cordis 宿主自愈插件。
+  <p>
+    <a href="https://www.npmjs.com/package/dsh-healer"><img src="https://img.shields.io/npm/v/dsh-healer.svg" alt="npm 版本" /></a>
+    <a href="https://www.npmjs.com/package/dsh-healer"><img src="https://img.shields.io/npm/dm/dsh-healer.svg" alt="npm 下载量" /></a>
+    <a href="https://github.com/viztor/dsh-healer/actions/workflows/ci.yml"><img src="https://github.com/viztor/dsh-healer/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://github.com/viztor/dsh-healer/actions/workflows/release.yml"><img src="https://github.com/viztor/dsh-healer/actions/workflows/release.yml/badge.svg" alt="Release" /></a>
+    <a href="https://github.com/viztor/dsh-healer/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/dsh-healer.svg" alt="许可协议" /></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/dsh-healer.svg" alt="Node" /></a>
+  </p>
+</div>
+
+---
 
 自动修复发往大模型的请求历史中畸变的空名称工具调用（`name: ""`）及未配对的
 孤立工具结果：正常请求原样透传，仅在模型服务商真正拒绝请求后才介入恢复。
-
----
 
 ## 解决的问题
 
@@ -200,44 +208,38 @@ vp run audit:session <f>     # 离线端到端审计真实的 session.v4.jsonl.z
 
 ### 发布
 
-发布由 CI 通过 npm
-[可信发布](https://docs.npmjs.com/trusted-publishers)（OIDC）完成，因此不存在
+发布由 [release-please](https://github.com/googleapis/release-please) 驱动：它读取
+`main` 上的 Conventional Commit 主题（`feat:`、`fix:` …），持续维护一个包含下一
+版本号与更新日志的升级 PR；合并该 PR 即创建标签与 GitHub Release，进而触发
+[`.github/workflows/release.yml`](.github/workflows/release.yml)。发布流程先核对
+标签与 `package.json` 是否一致，再跑完整门禁与突变测试，最后通过 npm
+[可信发布](https://docs.npmjs.com/trusted-publishers)（OIDC）发布，因此不存在
 需要轮换或可能泄漏的 `NPM_TOKEN`。
 
-```sh
-# 1. 升级版本号并提交
-npm version patch --no-git-tag-version && git commit -am "release: v0.1.1"
+有两项配置位于仓库之外，各只需设置一次：
 
-# 2. 打标签并推送 —— 标签才是触发发布的动作
-git tag v0.1.1 && git push origin main v0.1.1
-```
+1. **`RELEASE_PLEASE_TOKEN`** —— 细粒度 PAT，仅授予本仓库 Contents 与 Pull
+   requests 的读写权限，配置在 _Settings → Secrets and variables → Actions_。
+   用内置 `GITHUB_TOKEN` 创建的标签不会触发下游工作流，没有该 PAT 时发布看起来
+   已切出、却永远不会上线。在密钥就绪之前，`release-please` 任务会跳过并给出命名
+   该密钥的警告，而不是让每次推送都失败。
 
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml) 会先核对标签与
-`package.json` 是否一致，再跑完整门禁与突变测试，最后发布。若标签与版本号不符
-则直接终止，而不是发布一个没人要求的版本。
+2. **可信发布者** —— [npmjs.com](https://www.npmjs.com/package/dsh-healer/access)
+   → Trusted Publisher → GitHub Actions：
 
-**手动发布**同样可行，首个版本就是这么发出去的：
+   | 字段                 | 取值                   |
+   | -------------------- | ---------------------- |
+   | Organization or user | `viztor`               |
+   | Repository           | `dsh-healer`           |
+   | Workflow filename    | `release.yml`          |
+   | Allowed actions      | **勾选 `npm publish`** |
 
-```sh
-npm publish --otp=<身份验证器中的验证码>
-```
+   最后一行最容易漏掉：2026-09-03 之后创建的可信发布者默认只允许
+   `npm stage publish`，那会把每次发布变成等待人工批准的暂存发布，而不是直接发布。
 
-无论走哪条路径，都需要先在 npm 上为该包配置可信发布者 ——
-[npmjs.com](https://www.npmjs.com/package/dsh-healer/access) → Trusted Publisher
-→ GitHub Actions：
-
-| 字段                 | 取值                   |
-| -------------------- | ---------------------- |
-| Organization or user | `viztor`               |
-| Repository           | `dsh-healer`           |
-| Workflow filename    | `publish.yml`          |
-| Allowed actions      | **勾选 `npm publish`** |
-
-最后一行最容易漏掉：2026-09-03 之后创建的可信发布者默认只允许
-`npm stage publish`，那会把每次发布变成等待人工批准的暂存发布，而不是直接发布。
-
-仓库公开时 npm 会自动生成 provenance（来源证明）。目前仓库为私有，npm 不支持
-该功能 —— 即使包本身是公开的。
+本地执行 `npm publish --otp=…` 仍是应急路径 —— 首个 0.1.0 版本在流水线建立之前
+就是这样发布的。provenance（来源证明）自动生成：仓库现已公开，发布通过公开工作流
+的 OIDC 完成。
 
 ### 质量门禁指标
 

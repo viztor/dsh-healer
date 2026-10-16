@@ -1,18 +1,26 @@
-# Heal (`dsh-healer`)
+<div align="center">
+  <p><b>English</b> &nbsp;·&nbsp; <a href="./README.zh.md">简体中文</a></p>
 
-[![npm](https://img.shields.io/npm/v/dsh-healer.svg)](https://www.npmjs.com/package/dsh-healer)
-[![downloads](https://img.shields.io/npm/dm/dsh-healer.svg)](https://www.npmjs.com/package/dsh-healer)
-[![CI](https://github.com/viztor/dsh-healer/actions/workflows/ci.yml/badge.svg)](https://github.com/viztor/dsh-healer/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+  <img src="icon.svg" alt="Heal on DeepSeek Harness" width="112" />
+  <h1>dsh-healer</h1>
+  <p><b>A zero-copy, non-intrusive Cordis host plugin for DeepSeek Harness.</b><br />Repairs malformed tool-call blocks and orphaned tool results in flight.</p>
 
-A zero-copy, non-intrusive Cordis host plugin for DeepSeek Harness (DSH).
+  <p>
+    <a href="https://www.npmjs.com/package/dsh-healer"><img src="https://img.shields.io/npm/v/dsh-healer.svg" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/dsh-healer"><img src="https://img.shields.io/npm/dm/dsh-healer.svg" alt="npm downloads" /></a>
+    <a href="https://github.com/viztor/dsh-healer/actions/workflows/ci.yml"><img src="https://github.com/viztor/dsh-healer/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://github.com/viztor/dsh-healer/actions/workflows/release.yml"><img src="https://github.com/viztor/dsh-healer/actions/workflows/release.yml/badge.svg" alt="Release" /></a>
+    <a href="https://github.com/viztor/dsh-healer/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/dsh-healer.svg" alt="license" /></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/dsh-healer.svg" alt="node" /></a>
+  </p>
+</div>
+
+---
 
 It repairs malformed outbound tool-call blocks (`name: ""`) and orphaned tool
 results, without rewriting durable session logs and without touching healthy
 conversations. Normal requests pass through untouched; recovery runs only after a
 provider actually rejects one.
-
----
 
 ## The Problem
 
@@ -232,52 +240,51 @@ formats and lints staged files; see [Commit conventions](#commit-conventions).
 
 ### Releasing
 
-Publishing runs from CI through npm
-[trusted publishing](https://docs.npmjs.com/trusted-publishers) — OIDC, so there
+Releases are cut by [release-please](https://github.com/googleapis/release-please).
+It reads the Conventional Commit subjects on `main` (`feat:`, `fix:`, …) and keeps
+a version-bump pull request open with the next version and the changelog. Merging
+that pull request creates the tag and the GitHub Release, which fires
+[`.github/workflows/release.yml`](.github/workflows/release.yml) — the workflow
+checks the tag against `package.json`, runs the full gate and the mutation gate,
+and publishes through npm
+[trusted publishing](https://docs.npmjs.com/trusted-publishers): OIDC, so there
 is no `NPM_TOKEN` secret to leak or rotate.
 
-```sh
-# 1. Bump the version and commit it
-npm version patch --no-git-tag-version && git commit -am "release: v0.1.1"
+Two settings live outside this repository, and each is configured once:
 
-# 2. Tag and push — the tag is what triggers the release
-git tag v0.1.1 && git push origin main v0.1.1
-```
+1. **`RELEASE_PLEASE_TOKEN`** — a fine-grained PAT with Contents and Pull requests
+   read/write on this repository only, set under _Settings → Secrets and
+   variables → Actions_. Tags created with the built-in `GITHUB_TOKEN` do not
+   trigger downstream workflows, so without the PAT a release looks cut and never
+   publishes. Until the secret exists, the `release-please` job skips with a
+   warning naming it rather than failing every push.
 
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml) then checks the
-tag against `package.json`, runs the full gate and the mutation gate, and
-publishes. A tag that disagrees with `package.json` stops the run rather than
-publishing a version nobody asked for.
+2. **The trusted publisher** —
+   [npmjs.com](https://www.npmjs.com/package/dsh-healer/access) → Trusted
+   Publisher → GitHub Actions:
 
-**Publishing by hand** works too, and is how the first release went out:
+   | Field                | Value                  |
+   | -------------------- | ---------------------- |
+   | Organization or user | `viztor`               |
+   | Repository           | `dsh-healer`           |
+   | Workflow filename    | `release.yml`          |
+   | Allowed actions      | **tick `npm publish`** |
 
-```sh
-npm publish --otp=<code from your authenticator>
-```
+   The last row is easy to miss: trusted publishers created after 2026-09-03
+   default to `npm stage publish` only, which stages each release for manual
+   approval instead of publishing it.
 
-For either path to work, npm needs a trusted publisher configured for this
-package — [npmjs.com](https://www.npmjs.com/package/dsh-healer/access) → Trusted
-Publisher → GitHub Actions:
-
-| Field                | Value                  |
-| -------------------- | ---------------------- |
-| Organization or user | `viztor`               |
-| Repository           | `dsh-healer`           |
-| Workflow filename    | `publish.yml`          |
-| Allowed actions      | **tick `npm publish`** |
-
-The last row is easy to miss. Trusted publishers created after 2026-09-03 default
-to `npm stage publish` only, which stages each release for manual approval
-instead of publishing it.
-
-Provenance is generated automatically for a public repository. While this one is
-private, npm does not support it — even though the package is public.
+A local `npm publish --otp=…` remains the break-glass path — it is how the first
+release (0.1.0) went out, before this pipeline existed. Provenance is generated
+automatically: the repository is public, and the publish runs through OIDC from a
+public workflow.
 
 ### Commit conventions
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org),
-enforced by commitlint from a `commit-msg` hook. The types are the standard set
-plus `release`, which this project uses to cut its own releases.
+enforced by commitlint from a `commit-msg` hook. The types are the standard set;
+release-please derives the next version from the `feat` and `fix` subjects (see
+[Releasing](#releasing)).
 
 Hooks are installed by Vite+:
 
