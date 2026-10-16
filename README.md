@@ -230,6 +230,49 @@ The suite imports Vitest from `vite-plus/test`, so its types come from the
 toolchain rather than a second, separately-versioned copy of Vitest. A Git hook
 formats and lints staged files; see [Commit conventions](#commit-conventions).
 
+### Releasing
+
+Publishing runs from CI through npm
+[trusted publishing](https://docs.npmjs.com/trusted-publishers) — OIDC, so there
+is no `NPM_TOKEN` secret to leak or rotate.
+
+```sh
+# 1. Bump the version and commit it
+npm version patch --no-git-tag-version && git commit -am "release: v0.1.1"
+
+# 2. Tag and push — the tag is what triggers the release
+git tag v0.1.1 && git push origin main v0.1.1
+```
+
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) then checks the
+tag against `package.json`, runs the full gate and the mutation gate, and
+publishes. A tag that disagrees with `package.json` stops the run rather than
+publishing a version nobody asked for.
+
+**Publishing by hand** works too, and is how the first release went out:
+
+```sh
+npm publish --otp=<code from your authenticator>
+```
+
+For either path to work, npm needs a trusted publisher configured for this
+package — [npmjs.com](https://www.npmjs.com/package/dsh-healer/access) → Trusted
+Publisher → GitHub Actions:
+
+| Field                | Value                  |
+| -------------------- | ---------------------- |
+| Organization or user | `viztor`               |
+| Repository           | `dsh-healer`           |
+| Workflow filename    | `publish.yml`          |
+| Allowed actions      | **tick `npm publish`** |
+
+The last row is easy to miss. Trusted publishers created after 2026-09-03 default
+to `npm stage publish` only, which stages each release for manual approval
+instead of publishing it.
+
+Provenance is generated automatically for a public repository. While this one is
+private, npm does not support it — even though the package is public.
+
 ### Commit conventions
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org),

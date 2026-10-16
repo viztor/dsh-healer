@@ -198,6 +198,47 @@ vp run audit:session <f>     # 离线端到端审计真实的 session.v4.jsonl.z
 测试从 `vite-plus/test` 导入 Vitest，因此类型来自工具链本身，而不是另一份独立
 版本的 Vitest。Git 钩子会对暂存文件执行格式化与检查。
 
+### 发布
+
+发布由 CI 通过 npm
+[可信发布](https://docs.npmjs.com/trusted-publishers)（OIDC）完成，因此不存在
+需要轮换或可能泄漏的 `NPM_TOKEN`。
+
+```sh
+# 1. 升级版本号并提交
+npm version patch --no-git-tag-version && git commit -am "release: v0.1.1"
+
+# 2. 打标签并推送 —— 标签才是触发发布的动作
+git tag v0.1.1 && git push origin main v0.1.1
+```
+
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) 会先核对标签与
+`package.json` 是否一致，再跑完整门禁与突变测试，最后发布。若标签与版本号不符
+则直接终止，而不是发布一个没人要求的版本。
+
+**手动发布**同样可行，首个版本就是这么发出去的：
+
+```sh
+npm publish --otp=<身份验证器中的验证码>
+```
+
+无论走哪条路径，都需要先在 npm 上为该包配置可信发布者 ——
+[npmjs.com](https://www.npmjs.com/package/dsh-healer/access) → Trusted Publisher
+→ GitHub Actions：
+
+| 字段                 | 取值                   |
+| -------------------- | ---------------------- |
+| Organization or user | `viztor`               |
+| Repository           | `dsh-healer`           |
+| Workflow filename    | `publish.yml`          |
+| Allowed actions      | **勾选 `npm publish`** |
+
+最后一行最容易漏掉：2026-09-03 之后创建的可信发布者默认只允许
+`npm stage publish`，那会把每次发布变成等待人工批准的暂存发布，而不是直接发布。
+
+仓库公开时 npm 会自动生成 provenance（来源证明）。目前仓库为私有，npm 不支持
+该功能 —— 即使包本身是公开的。
+
 ### 质量门禁指标
 
 - **测试通过率**：完整测试套件由 CI 在每次推送时执行。
