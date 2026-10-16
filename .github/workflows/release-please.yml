@@ -1,0 +1,67 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # Read here because `if` cannot see `secrets`, and this is the only place the
+    # token can be read that both steps can then test.
+    env:
+      RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+    steps:
+      # Reads conventional commits (`feat:`, `fix:`, …) since the last release and
+      # opens a version-bump pull request. Merging that PR creates the tag and the
+      # GitHub Release, which fires `release.yml`.
+      #
+      # The settings that matter are in `release-please-config.json`, not in the
+      # inputs below, because none of them is an action input:
+      #
+      # - `bump-minor-pre-major` keeps a breaking change on the minor line while
+      #   the version is below 1.0.0. Without it a `feat!` proposes 1.0.0, and
+      #   this plugin has no business reaching 1.0.0 before the harness it plugs
+      #   into leaves 0.x.
+      # - `include-component-in-tag: false` keeps tags as `v0.2.0`. The default
+      #   prefixes the component (`dsh-healer-v0.2.0`), which matches no
+      #   `v*.*.*` filter and so would never fire the publish workflow.
+      #
+      # `manifest-file` is what puts the action in manifest mode, which is the
+      # mode `config-file` requires. It carries one line per package path and is
+      # kept in step with the released version by release-please itself.
+      #
+      # **The PAT is not optional.** Tags and releases created with the built-in
+      # `GITHUB_TOKEN` do not trigger downstream workflows, so a release-please
+      # running on the default token would produce a tag that never publishes —
+      # a release that looks cut and is not. `RELEASE_PLEASE_TOKEN` is a
+      # fine-grained PAT with Contents and Pull requests read/write on this
+      # repository only. The one-time setup is in the README, under Releasing.
+      #
+      # Until that secret exists this job would fail on every push with "Input
+      # required and not supplied: token". That is the action's own message and
+      # it is clear — but a workflow that is red on every push stops meaning
+      # anything. So the action is skipped while the secret is absent, and a
+      # warning says what is missing. Green means green; the setup step is still
+      # visible.
+      #
+      # `secrets` cannot appear in an `if` — not at the job level and not at the
+      # step level; the contexts table allows it in `env`, `with` and a handful
+      # of other keys, and an `if` referencing it makes GitHub reject the whole
+      # file as invalid. Routing it through a job-level `env` first is the way to
+      # make the decision conditional, because `env` *is* available to `if`.
+      - uses: googleapis/release-please-action@v5
+        if: env.RELEASE_PLEASE_TOKEN != ''
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ env.RELEASE_PLEASE_TOKEN }}
+
+      - name: Say why nothing was released
+        if: env.RELEASE_PLEASE_TOKEN == ''
+        run: |
+          echo "::warning title=release-please is not running::Set the RELEASE_PLEASE_TOKEN repository secret — without it, tags made with the built-in GITHUB_TOKEN do not trigger the publish workflow, so a release looks cut and never ships. See the README, under Releasing."

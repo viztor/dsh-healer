@@ -1,0 +1,185 @@
+name: release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  # The tag trigger is the only way this workflow runs in normal use, which means
+  # it cannot be exercised until a release is already happening — the worst moment
+  # to discover a defect in it. A manual run walks the same steps and stops before
+  # publishing, so the machinery can be tested on purpose rather than during a
+  # release.
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Verify without publishing
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Keyed on the tag, never cancelled. Two runs of the SAME tag race — the second
+# would hit a half-published registry — and they are both wanted here: a re-run
+# after a transient npm fault is exactly how a release recovers, and the publish
+# step skips versions already on the registry. Cancelling one would leave the
+# release in the state where neither run finished.
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # The same setup the commit gate uses. setup-vp installs Vite+, the
+      # requested Node and the package manager, and runs `vp install` (which also
+      # triggers this package's `prepare` build).
+      - uses: voidzero-dev/setup-vp@v1.21.2
+        with:
+          node-version: '24'
+          cache: true
+
+      - name: Format and lint
+        run: vp check
+
+      # Explicit, not inherited: the panel-independent bundle is what ships, and a
+      # release build should not rely on a lifecycle hook having fired.
+      - name: Build bundles
+        run: vp run build
+
+      # The whole gate in one command — typechecks, the suite with the harness
+      # guard active, and the upstream verifier. Not spelled out step by step: a
+      # tag should run exactly what a commit runs, and two lists of the same
+      # steps drift.
+      - name: Full gate
+        run: vp run ci
+
+      - name: Mutation gate
+        run: vp run test:mutation
+
+  publish:
+    name: Publish to npm
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # OIDC trusted publishing needs this and nothing else: no token is stored
+      # in the repository, and provenance is automatic.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      # No caching: a release build should not be able to consume a stale or
+      # poisoned cache entry.
+      - uses: voidzero-dev/setup-vp@v1.21.2
+        with:
+          node-version: '24'
+          cache: false
+
+      # Trusted publishing needs npm 11.5.1 or later; the bundled npm for a given
+      # Node release is not something this workflow should assume.
+      - name: npm is new enough for trusted publishing
+        run: |
+          version=$(npm --version)
+          major=${version%%.*}
+          rest=${version#*.}
+          minor=${rest%%.*}
+          if [ "$major" -lt 11 ] || { [ "$major" -eq 11 ] && [ "$minor" -lt 5 ]; }; then
+            echo "::error::npm $version is too old for trusted publishing (needs >= 11.5.1)"
+            exit 1
+          fi
+          echo "npm $version"
+
+      # A tag that disagrees with package.json publishes a version nobody can
+      # match to a commit, so this is checked before anything is built.
+      #
+      # The ref arrives through the environment rather than being interpolated
+      # into the script text: a tag name may contain `;`, `"`, `$` or a
+      # backtick, and this job holds `id-token: write`.
+      - name: The tag matches the manifest version
+        # A manual run has no tag to compare against.
+        if: github.event_name == 'push'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$expected" ]; then
+            echo "::error::$TAG does not match package.json $expected"
+            exit 1
+          fi
+
+      # Explicit, not inherited: `lib/` otherwise exists only because the
+      # `prepare` lifecycle fired during install, and the publish below runs with
+      # `--ignore-scripts`.
+      - name: Build
+        run: vp run build
+
+      # Trusted publishing: the registry verifies this workflow's OIDC identity,
+      # so no secret exists to leak or expire. Requires a matching trusted
+      # publisher on npmjs.com:
+      #
+      #   Organization or user  viztor
+      #   Repository            dsh-healer
+      #   Workflow filename     release.yml
+      #   Allowed actions       npm publish   ← must be ticked
+      #
+      # The last one matters: trusted publishers created after 2026-09-03 default
+      # to `npm stage publish` only, which would stage the release for manual
+      # approval instead of publishing it.
+      #
+      # `--ignore-scripts` because the `verify` job already ran the full gate on
+      # this same commit; letting `prepare` or `prepublishOnly` run again would
+      # double the work and give a second, differently-timed chance to fail.
+      #
+      # The `npm view` guard is the only place idempotency belongs: npm refuses
+      # to republish a version, so a retried tag has to skip rather than fail.
+      # The publish itself is NOT guarded — a swallowed error here produces a
+      # green release for a version that never reached the registry.
+      - name: Publish to npmjs (OIDC, provenance)
+        # `inputs.dry-run` is unset on a tag push, where the step must run.
+        if: inputs.dry-run != true
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "dsh-healer@$version" version 2>/dev/null; then
+            echo "$version is already on npmjs, skipping"
+          else
+            npm publish --provenance --access public --ignore-scripts
+          fi
+
+      - name: Dry run — nothing was published
+        if: inputs.dry-run == true
+        run: |
+          echo "::notice::Dry run: the tag check, the build and the gate all ran; publishing was skipped."
+
+      # The release claim, checked instead of assumed. A successful `npm publish`
+      # does not mean the version is readable yet — npm answers "your package is
+      # being processed and may take a few minutes to become available", and an
+      # immediate `npm view` returns nothing. Checking once reports a healthy
+      # release as failed.
+      #
+      # Eight minutes, because that is what it has taken in practice for a
+      # package of this size. The message names the two things worth knowing:
+      # the publish step above was green, so this is npm still indexing rather
+      # than a failed publish; and the command to re-check by hand.
+      - name: Verify the published version is readable
+        if: inputs.dry-run != true
+        run: |
+          version=$(node -p "require('./package.json').version")
+          attempts=33
+          interval=15
+          for attempt in $(seq 1 $attempts); do
+            if npm view "dsh-healer@$version" version >/dev/null 2>&1; then
+              echo "dsh-healer@$version is live on npmjs.org (attempt $attempt/$attempts)"
+              exit 0
+            fi
+            if [ "$attempt" -lt "$attempts" ]; then
+              echo "attempt $attempt/$attempts: waiting for npm to index dsh-healer@$version"
+              sleep $interval
+            fi
+          done
+          echo "::error::dsh-healer@$version is still unreadable after $((attempts * interval - interval))s"
+          echo "::error::The publish step above was green, so npm is still processing it rather than having rejected it. Re-check with: npm view dsh-healer@$version version"
+          exit 1

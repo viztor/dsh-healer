@@ -1,0 +1,35 @@
+name: dependency-review
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      # Action bumps carry the same invisible blast radius as package bumps —
+      # a compromised action runs with the workflow token — so they are
+      # reviewed here too rather than merged unreviewed.
+      - '.github/workflows/**'
+      - '.github/dependabot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    # A dependency change is the one change whose blast radius is invisible in
+    # the diff: a patch bump can pull in a compromised transitive package, and
+    # nothing in the source diff says so. This comments on the PR when a
+    # dependency introduces a known vulnerability or an incompatible license,
+    # before it merges rather than after it ships.
+    #
+    # This gates; it is not `continue-on-error`. A warning on every dependency
+    # PR is a warning nobody reads, which is the same as not running. The action
+    # needs the repository's Dependency graph, which public repositories have on
+    # by default.
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-1.0, AGPL-3.0

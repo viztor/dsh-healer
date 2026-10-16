@@ -7,8 +7,25 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Etc/UTC
     open-pull-requests-limit: 5
+    labels: [dependencies]
+    ignore:
+      # The Voidzero toolchain moves as one lever, by hand. `vite-plus` bundles
+      # its own Vitest at an exact version, so a bot moving it alone can leave
+      # the suite importing a different Vitest than the one running it — and a
+      # bump picked up inside pnpm's 24-hour release-age window is red on
+      # arrival. Move it deliberately with the gate, not on a schedule.
+      - dependency-name: 'vite-plus'
     groups:
+      # One PR for the harness set. The @deepseek-ai/* packages are prereleases
+      # that move fast, and the plugin compiles against their surfaces: bump one
+      # without the others and the lockfile resolves a mixture of two runtimes.
+      dsh-runtime:
+        patterns:
+          - '@deepseek-ai/*'
       dev-dependencies:
         dependency-type: development
         update-types: [minor, patch]
@@ -18,4 +35,8 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    labels: [dependencies, ci]
+    groups:
+      actions:
+        patterns: ['*']
