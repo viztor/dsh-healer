@@ -382,7 +382,7 @@ message naming the five affected files and the usual cause. A machine that
 genuinely has no DSH acknowledges it explicitly:
 
 ```sh
-pnpm run test:no-harness      # DSH_HEAL_ALLOW_NO_HARNESS=1
+vp run test:no-harness        # DSH_HEAL_ALLOW_NO_HARNESS=1
 ```
 
 | condition                    | tests | result                            |
@@ -390,6 +390,11 @@ pnpm run test:no-harness      # DSH_HEAL_ALLOW_NO_HARNESS=1
 | harness present              | 515   | pass                              |
 | harness absent               | 427   | **fail**, naming what did not run |
 | harness absent, acknowledged | 426   | pass                              |
+
+(The counts are what these runs reported at the time. The resolver has since
+learned to search this installation's own store, not only the dlx cache, which is
+what CI has — so "harness absent" is now a property of the machine rather than of
+where the package happens to be cached.)
 
 ## 3h. The two "unclosable" gaps were both closed
 
