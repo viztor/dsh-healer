@@ -9,3 +9,6 @@
 # install scripts still fails loudly and has to be considered.
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@deepseek-ai/cordis@4.0.5'
+  - '@deepseek-ai/cosmokit@1.8.6'
