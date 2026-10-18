@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "prepare": "pnpm run build",
+    "prepare": "vp run build",
     "test": "vp test",
     "test:coverage": "vp test --coverage",
     "test:mutation": "node scripts/mutate.ts",
@@ -54,12 +54,16 @@
     "typecheck": "tsc --noEmit -p tsconfig.test.json",
     "typecheck:src": "tsc --noEmit -p tsconfig.src.json",
     "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json",
-    "ci": "vp check && pnpm run typecheck:src && pnpm run typecheck && pnpm run typecheck:scripts && pnpm test && pnpm run test:upstream",
-    "ci:full": "pnpm run ci && pnpm run test:mutation",
+    "ci": "vp check && vp run typecheck:src && vp run typecheck && vp run typecheck:scripts && vp test && vp run test:upstream",
+    "ci:full": "vp run ci && vp run test:mutation",
     "audit:session": "node scripts/audit-session.ts",
     "test:no-harness": "DSH_HEAL_ALLOW_NO_HARNESS=1 vp test",
     "typecheck:dlx": "pnpm dlx --package=typescript@5.9.3 tsc --noEmit -p tsconfig.test.json",
-    "accept:live": "node scripts/live-acceptance.ts"
+    "accept:live": "node scripts/live-acceptance.ts",
+    "check": "vp check",
+    "version:patch": "vp pm version patch --no-git-checks",
+    "version:minor": "vp pm version minor --no-git-checks",
+    "version:major": "vp pm version major --no-git-checks"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
