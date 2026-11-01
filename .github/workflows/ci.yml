@@ -33,7 +33,7 @@ jobs:
       # the project's own guidance is not to use it. setup-vp installs Vite+,
       # the requested Node, and the package manager, and runs `vp install`
       # (which also triggers this package's `prepare` build) with caching.
-      - uses: voidzero-dev/setup-vp@v1.21.2
+      - uses: voidzero-dev/setup-vp@v1.22.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: true

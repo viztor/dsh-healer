@@ -37,7 +37,7 @@ jobs:
       # The same setup the commit gate uses. setup-vp installs Vite+, the
       # requested Node and the package manager, and runs `vp install` (which also
       # triggers this package's `prepare` build).
-      - uses: voidzero-dev/setup-vp@v1.21.2
+      - uses: voidzero-dev/setup-vp@v1.22.0
         with:
           node-version: '24'
           cache: true
@@ -74,7 +74,7 @@ jobs:
 
       # No caching: a release build should not be able to consume a stale or
       # poisoned cache entry.
-      - uses: voidzero-dev/setup-vp@v1.21.2
+      - uses: voidzero-dev/setup-vp@v1.22.0
         with:
           node-version: '24'
           cache: false
